@@ -4,9 +4,14 @@ import {
   toUserResponse,
   UserResponse,
 } from "../model/user-model";
-import { loginSchema, registerSchema } from "../validation/user-validation";
+import {
+  loginSchema,
+  registerSchema,
+  tokenSchema,
+} from "../validation/user-validation";
 import { prismaClient } from "../application/database";
 import { HTTPException } from "hono/http-exception";
+import { User } from "@prisma/client";
 
 export const registerUser = async (
   request: RegisterUserRequest
@@ -83,4 +88,30 @@ export const loginUser = async (
   response.token = user.token!;
 
   return response;
+};
+
+export const getUser = async (
+  token: string | null | undefined
+): Promise<User> => {
+  const { data, error } = tokenSchema.safeParse(token);
+
+  if (error) {
+    throw new HTTPException(401, {
+      message: "Unauthorized",
+    });
+  }
+
+  const user = await prismaClient.user.findFirst({
+    where: {
+      token: data.token,
+    },
+  });
+
+  if (!user) {
+    throw new HTTPException(401, {
+      message: "Unauthorized",
+    });
+  }
+
+  return user;
 };
