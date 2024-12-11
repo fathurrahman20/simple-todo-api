@@ -1,20 +1,25 @@
-import {User} from "@prisma/client";
+import { User } from "@prisma/client";
 
 export type RegisterUserRequest = {
-    name: string;
-    username: string;
-    password: string;
+  name: string;
+  username: string;
+  password: string;
+};
+
+export type LoginUserRequest = {
+  username: string;
+  password: string;
 };
 
 export type UserResponse = {
-    username: string;
-    name: string;
-    token?: string;
+  username: string;
+  name: string;
+  token?: string;
 };
 
 export function toUserResponse(user: User): UserResponse {
-    return {
-        name: user.name,
-        username: user.username,
-    }
+  return {
+    name: user.name,
+    username: user.username,
+  };
 }
