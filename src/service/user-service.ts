@@ -146,3 +146,16 @@ export const updateUser = async (
 
   return toUserResponse(user);
 };
+
+export const logoutUser = async (user: User): Promise<boolean> => {
+  await prismaClient.user.update({
+    where: {
+      username: user.username,
+    },
+    data: {
+      token: null,
+    },
+  });
+
+  return true;
+};

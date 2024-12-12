@@ -8,6 +8,7 @@ import {
 import {
   getUser,
   loginUser,
+  logoutUser,
   registerUser,
   updateUser,
 } from "../service/user-service";
@@ -65,6 +66,16 @@ userController.patch("/api/users/current", async (c) => {
   const request = (await c.req.json()) as UpdateUserRequest;
 
   const response = await updateUser(user, request);
+
+  return c.json({
+    data: response,
+  });
+});
+
+userController.delete("/api/users/current", async (c) => {
+  const user = c.get("user") as User;
+
+  const response = await logoutUser(user);
 
   return c.json({
     data: response,
