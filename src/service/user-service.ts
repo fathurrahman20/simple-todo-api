@@ -2,12 +2,14 @@ import {
   LoginUserRequest,
   RegisterUserRequest,
   toUserResponse,
+  UpdateUserRequest,
   UserResponse,
 } from "../model/user-model";
 import {
   loginSchema,
   registerSchema,
   tokenSchema,
+  updateSchema,
 } from "../validation/user-validation";
 import { prismaClient } from "../application/database";
 import { HTTPException } from "hono/http-exception";
@@ -114,4 +116,33 @@ export const getUser = async (
   }
 
   return user;
+};
+
+export const updateUser = async (
+  user: User,
+  request: UpdateUserRequest
+): Promise<UserResponse> => {
+  const { data } = updateSchema.safeParse(user) as { data: User };
+
+  // user.name = data?.name ?? user.name;
+  if (data.name) user.name = data.name;
+
+  if (data.password) {
+    user.password = await Bun.password.hash(data.password, {
+      algorithm: "bcrypt",
+      cost: 10,
+    });
+  }
+
+  await prismaClient.user.update({
+    where: {
+      username: data.username,
+    },
+    data: {
+      name: user.name,
+      password: user.password,
+    },
+  });
+
+  return toUserResponse(user);
 };
